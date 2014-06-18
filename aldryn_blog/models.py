@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
-from collections import Counter
+#from collections import Counter
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -68,11 +68,21 @@ class RelatedManager(models.Manager):
         entries = self.filter_by_language(language)
         dates = entries.values_list('publication_start', flat=True)
         dates = [(x.year, x.month) for x in dates]
-        date_counter = Counter(dates)
+        #date_counter = Counter(dates)
+        date_counter = self.get_date_counts(dates)
         dates = set(dates)
         dates = sorted(dates, reverse=True)
         return [{'date': datetime.date(year=year, month=month, day=1),
                  'count': date_counter[year, month]} for year, month in dates]
+        
+    def get_date_counts(self, collection):
+        d = {}
+        for pair in collection:
+            if pair in d:
+                d[pair] = d[pair] + 1
+            else:
+                d[pair] = 1
+        return d
 
 
 class PublishedManager(RelatedManager):
